@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CopyTheSelectedFolderAnotherLocation
+namespace CopySelectedFolderToAnotherLocation
 {
     public partial class Form1 : Form
     {
@@ -17,43 +10,56 @@ namespace CopyTheSelectedFolderAnotherLocation
         {
             InitializeComponent();
         }
-        private void btnKaynak_Click(object sender, EventArgs e)
+
+        private void btnSource_Click(object sender, EventArgs e)
         {
-            txtKaynak.Text = "";//If it is wanted to be used again without closing the program, I use it so that the textbox resets itself.
+            txtSource.Text = ""; // Reset the textbox to enable reuse without program restart
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                txtKaynak.Text = Path.Combine(fbd.SelectedPath, Path.GetFileName(txtKaynak.Text));
+                txtSource.Text = fbd.SelectedPath; // Set the selected source folder path in the textbox
             }
         }
-        private void btnHedef_Click(object sender, EventArgs e)
+
+        private void btnDestination_Click(object sender, EventArgs e)
         {
-            txtHedef.Text = "";
+            txtDestination.Text = "";
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                txtHedef.Text = Path.Combine(fbd.SelectedPath, Path.GetFileName(txtHedef.Text));
-                btnKopyala.Enabled = true;
+                txtDestination.Text = fbd.SelectedPath; // Set the selected destination folder path in the textbox
+                btnCopy.Enabled = true; // Enable the copy button since both source and destination are selected
             }
         }
-        public static void CopyAll(DirectoryInfo Kaynak, DirectoryInfo Hedef)
+
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo destination)
         {
-            Directory.CreateDirectory(Hedef.FullName);
-            foreach (FileInfo fi in Kaynak.GetFiles())
+            Directory.CreateDirectory(destination.FullName); // Create the destination directory
+
+            foreach (FileInfo file in source.GetFiles())
             {
-                fi.CopyTo(Path.Combine(Hedef.FullName, fi.Name), true);
+                file.CopyTo(Path.Combine(destination.FullName, file.Name), true); // Copy each file from source to destination
             }
-            foreach (DirectoryInfo subDirectory in Kaynak.GetDirectories())
+
+            foreach (DirectoryInfo subDirectory in source.GetDirectories())
             {
-                DirectoryInfo SiradakiDosya = Hedef.CreateSubdirectory(subDirectory.Name);
-                CopyAll(subDirectory, SiradakiDosya);
+                DirectoryInfo nextDestination = destination.CreateSubdirectory(subDirectory.Name); // Create a subdirectory in the destination
+                CopyAll(subDirectory, nextDestination); // Recursively copy all contents of subdirectories
             }
         }
-        private void btnKopyala_Click(object sender, EventArgs e)
+
+        private void btnCopy_Click(object sender, EventArgs e)
         {
-            CopyAll(new DirectoryInfo(txtKaynak.Text), new DirectoryInfo(txtHedef.Text));
-            MessageBox.Show("Seçilen dosya başarıyla kopyalandı.", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                // Call the CopyAll method to start the copying process
+                CopyAll(new DirectoryInfo(txtSource.Text), new DirectoryInfo(txtDestination.Text));
+                MessageBox.Show("Selected folder successfully copied.", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Display error message if copying fails
+            }
         }
     }
 }
-
