@@ -1,0 +1,12 @@
+# Ignore Visual Studio files
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.pdb
+*.exe
+*.dll
+*.dbmdl
+*.log
+*.vs/

@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace CopySelectedFolderToAnotherLocation
+namespace CopyTheSelectedFolderAnotherLocation
 {
     public partial class Form1 : Form
     {
@@ -11,29 +11,35 @@ namespace CopySelectedFolderToAnotherLocation
             InitializeComponent();
         }
 
-        private void btnSource_Click(object sender, EventArgs e)
+        private void btnKaynak_Click(object sender, EventArgs e)
         {
-            txtSource.Text = ""; // Reset the textbox to enable reuse without program restart
+            txtKaynak.Text = ""; // Reset the textbox to enable reuse without program restart
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                txtSource.Text = fbd.SelectedPath; // Set the selected source folder path in the textbox
+                txtKaynak.Text = fbd.SelectedPath; // Set the selected source folder path in the textbox
             }
         }
 
-        private void btnDestination_Click(object sender, EventArgs e)
+        private void btnHedef_Click(object sender, EventArgs e)
         {
-            txtDestination.Text = "";
+            txtHedef.Text = "";
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                txtDestination.Text = fbd.SelectedPath; // Set the selected destination folder path in the textbox
-                btnCopy.Enabled = true; // Enable the copy button since both source and destination are selected
+                txtHedef.Text = fbd.SelectedPath; // Set the selected destination folder path in the textbox
+                btnKopyala.Enabled = true; // Enable the copy button since both source and destination are selected
             }
         }
 
         public static void CopyAll(DirectoryInfo source, DirectoryInfo destination)
         {
+            if (destination.FullName.StartsWith(source.FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("Destination cannot be inside the source folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Directory.CreateDirectory(destination.FullName); // Create the destination directory
 
             foreach (FileInfo file in source.GetFiles())
@@ -48,12 +54,12 @@ namespace CopySelectedFolderToAnotherLocation
             }
         }
 
-        private void btnCopy_Click(object sender, EventArgs e)
+        private void btnKopyala_Click(object sender, EventArgs e)
         {
             try
             {
                 // Call the CopyAll method to start the copying process
-                CopyAll(new DirectoryInfo(txtSource.Text), new DirectoryInfo(txtDestination.Text));
+                CopyAll(new DirectoryInfo(txtKaynak.Text), new DirectoryInfo(txtHedef.Text));
                 MessageBox.Show("Selected folder successfully copied.", "Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
